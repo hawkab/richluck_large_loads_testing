@@ -107,3 +107,9 @@ def runCounterStrikeTest():
 	print postCounterStrikeResult()
 	print postAddInToplist(12,'test','test@test.ru',20,getToken(topList))._content
 	print postShowFrontToplist(12)
+
+if str(sys.argv[1]) == 'minecraft':
+	runMinecraftTest()
+	
+if str(sys.argv[1]) == 'cs':
+	runCounterStrikeTest()
