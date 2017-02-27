@@ -1,11 +1,19 @@
 # -*- coding: utf-8 -*-
 
 from joblib import Parallel, delayed
-import multiprocessing
+import multiprocessing, sys
 from runTest import *
 
-inputs = range(2) 
+def sleepBeforeRun(i):
+	time.sleep(4)
+	runRandomTest(i)
+
+count = 10
+if len(sys.argv)>1:
+	count = int(sys.argv[1])
+
+inputs = range(count)
 
 num_cores = multiprocessing.cpu_count()
-    
-results = Parallel(n_jobs=num_cores)(delayed(runMinecraftTest)() for i in inputs)
+
+results = Parallel(n_jobs=num_cores)(delayed(runRandomTest)(i) for i in inputs)
