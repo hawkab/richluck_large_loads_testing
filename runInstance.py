@@ -4,10 +4,6 @@ from joblib import Parallel, delayed
 import multiprocessing, sys
 from runTest import *
 
-def sleepBeforeRun(i):
-	time.sleep(4)
-	runRandomTest(i)
-
 count = 10
 if len(sys.argv)>1:
 	count = int(sys.argv[1])

@@ -93,7 +93,6 @@ def runMinecraftTest(i):
 	topList = postLoadQuizData(9)
 	print topList
 	print postMinecraftResult()
-	time.sleep(i*0.03)
 	print postAddInToplist(9,'MC_%d_%s' %(i,getRnd()),'mc_%d_%s@tst.ru' %(i,getRnd()),30,getToken(topList))._content
 	print postShowFrontToplist(9)
 
@@ -106,7 +105,6 @@ def runCounterStrikeTest(i):
 	topList = postLoadQuizData(12)
 	print topList
 	print postCounterStrikeResult()
-	time.sleep(i*0.0123)
 	print postAddInToplist(12,'CS_%d_%s' %(i,getRnd()),'cs_%d_%s@tst.ru' %(i,getRnd()),20,getToken(topList))._content
 	print postShowFrontToplist(12)
 
@@ -115,7 +113,6 @@ def runRandomTest(i):
 		runMinecraftTest(i)
 	else:
 		runCounterStrikeTest(i)
-
 
 def getRnd():
 	return genRandomString()
