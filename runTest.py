@@ -116,7 +116,7 @@ def runCounterStrikeTest ( i ):
 		, getToken ( topList ))._content
 	print postShowFrontToplist ( 12 )
 
-def runRandomTest ( i ):
+def runTest ( i ):
 	if i % 2 == 1:
 		runMinecraftTest ( i )
 	else:
