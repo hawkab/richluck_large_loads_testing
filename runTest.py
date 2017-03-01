@@ -3,20 +3,59 @@
 import requests , re , sys , json , random , string , time
 from results import *
 
-url = "http://rich.test/wp-admin/admin-ajax.php"
+site = "http://rich.test/"
+url = "%swp-admin/admin-ajax.php" % site
 action = "wp_pro_quiz_admin_ajax"
 
-def getPage():
-	func_name = sys._getframe().f_code.co_name
-	print func_name
+def printFuncName ( frame ):
+	print frame.f_code.co_name
 
-	resp = requests.get("http://rich.test/?test = minecraft")
+def getPage ( cookie = {} ):
+	printFuncName ( sys._getframe() )
+
+	resp = requests.get("%s?test = minecraft" % site, cookies = cookie)
 	return resp
 
-def postQuizLoadData ( quizId ):
-	func_name = sys._getframe().f_code.co_name
-	print func_name
-	
+def login ( username , password ):
+	printFuncName ( sys._getframe() )
+
+	resp = requests.post ( "%swp-login.php" % site
+		, { "log": username
+		, "pwd": password
+		, "wp-submit": "Войти"
+		, "redirect_to": "http://rich.test/wp-admin/"
+		, "testcookie": 1 }
+		, allow_redirects = False)
+	return resp
+
+def getCookie ( resp ):
+	printFuncName ( sys._getframe() )
+
+	token = resp.cookies.get("wordpress_677030e17c6dca5bcd9a6fe68cc8a1b9"
+	, path='/wp-admin')
+	cookies = dict(wordpress_677030e17c6dca5bcd9a6fe68cc8a1b9=token,
+	wordpress_test_cookie="WP+Cookie+check")
+	return cookies
+
+def getAuthPage ( username , password ):
+	printFuncName ( sys._getframe() )
+
+	result = getPage ( getCookie ( login ( username , password ) ) )
+	result.isAuth = isAuth ( result._content )
+	return result
+
+def isAuth ( content ):
+	printFuncName ( sys._getframe() )
+
+	return True if "Выход" in content else False
+
+#print getAuthPage ( "test0" , "test" ).isAuth
+
+#for p in r.cookies: print p.path
+
+
+def postQuizLoadData ( quizId , cookies ):
+	printFuncName ( sys._getframe() )
 	
 	func = "quizLoadData"
 	resp = requests.post ( url , { 'action' : action
@@ -24,9 +63,8 @@ def postQuizLoadData ( quizId ):
 		, 'data[quizId]' : quizId})
 	return resp
 
-def postLoadQuizData ( quizId ):
-	func_name = sys._getframe().f_code.co_name
-	print func_name
+def postLoadQuizData ( quizId , cookies  ):
+	printFuncName ( sys._getframe() )
 
 	func = "loadQuizData"
 	resp = requests.post ( url , { 'action' : action
@@ -34,25 +72,22 @@ def postLoadQuizData ( quizId ):
 		, 'data[quizId]' : quizId})
 	return resp
 
-def postMinecraftResult():
-	func_name = sys._getframe().f_code.co_name
-	print func_name
+def postMinecraftResult ( cookies ):
+	printFuncName ( sys._getframe() )
 
 	data = getMinecraftResults()
 	resp = requests.post ( url , data )
 	return resp
 
-def postCounterStrikeResult():
-	func_name = sys._getframe().f_code.co_name
-	print func_name
+def postCounterStrikeResult ( cookies ):
+	printFuncName ( sys._getframe() )
 
 	data = getCounterStrikeResults()
 	resp = requests.post ( url , data )
 	return resp
 
-def postAddInToplist ( quizId , name , email , totalPoints , token ):
-	func_name = sys._getframe().f_code.co_name
-	print func_name
+def postAddInToplist ( quizId , name , email , totalPoints , token , cookies  ):
+	printFuncName ( sys._getframe() )
 
 	func = "addInToplist"
 	captcha = ''
@@ -71,13 +106,10 @@ def postAddInToplist ( quizId , name , email , totalPoints , token ):
 		,'data[totalPoints]' : totalPoints})
 	return resp
 
-def postShowFrontToplist ( quizId ):
-	func_name = sys._getframe().f_code.co_name
-	print func_name
-	url = "http://rich.test/wp-admin/admin-ajax.php"
-	action = "wp_pro_quiz_admin_ajax"
-	func = "showFrontToplist"
+def postShowFrontToplist ( quizId , cookies  ):
+	printFuncName ( sys._getframe() )
 
+	func = "showFrontToplist"
 	resp = requests.post ( url , { 'action' : action
 		,'func' : func , 'data[quizId]' : quizId
 		,'data[quizIds][]' : quizId})
@@ -86,9 +118,8 @@ def postShowFrontToplist ( quizId ):
 def getToken ( input ):
 	return json.loads ( input._content )[ 'toplist' ][ 'token' ]
 
-def runMinecraftTest ( i ):
-	func_name = sys._getframe().f_code.co_name
-	print func_name
+def runMinecraftTest ( i , cookies  ):
+	printFuncName ( sys._getframe() )
 
 	print getPage()
 	print postQuizLoadData ( 9 )
@@ -101,16 +132,15 @@ def runMinecraftTest ( i ):
 		, getToken ( topList ))._content
 	print postShowFrontToplist ( 9 )
 
-def runCounterStrikeTest ( i ):
-	func_name = sys._getframe().f_code.co_name
-	print func_name
+def runCounterStrikeTest ( i , cookies  ):
+	printFuncName ( sys._getframe() )
 	
 	print getPage()
 	print postQuizLoadData ( 12 )
 	topList = postLoadQuizData ( 12 )
 	print topList
 	print postCounterStrikeResult()
-	print postAddInToplist( 12 , 'CS_%d_%s' % ( i ,getRnd() )
+	print postAddInToplist ( 12 , 'CS_%d_%s' % ( i ,getRnd() )
 		, 'cs_%d_%s@tst.ru' % ( i , getRnd() )
 		, 20
 		, getToken ( topList ))._content
@@ -118,15 +148,17 @@ def runCounterStrikeTest ( i ):
 
 def runTest ( i ):
 	if i % 2 == 1:
-		runMinecraftTest ( i )
+		runMinecraftTest ( i , cookie  )
 	else:
-		runCounterStrikeTest ( i )
+		runCounterStrikeTest ( i , cookie  )
 
 def getRnd():
 	return genRandomString()
 
 def genRandomString ( size = 5 , chars = string.ascii_uppercase + string.digits ):
 	return ''.join ( random.choice ( chars ) for _ in range ( size ))
+
+#print login('test0','test').__dict__
 
 if len ( sys.argv )>1:
 	if str ( sys.argv[ 1 ]) == 'minecraft':
